@@ -32,18 +32,18 @@ Note that chaincode upgrade also calls this function to reset or migrate data */
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	// set up any varialbes or asset here by calling the sub.PutState() method
 	products := []Product{
-		{Brand: "Apple", Price: 1000, Count: 10},
-		{Brand: "Samsung", Price: 800, Count: 20},
-		{Brand: "Huawei", Price: 600, Count: 30},
-		{Brand: "Xiaomi", Price: 400, Count: 40},
-		{Brand: "Oppo", Price: 300, Count: 50},
+		Product{Brand: "Apple", Price: 1000, Count: 10},
+		Product{Brand: "Samsung", Price: 800, Count: 20},
+		Product{Brand: "Huawei", Price: 600, Count: 30},
+		Product{Brand: "Xiaomi", Price: 400, Count: 40},
+		Product{Brand: "Oppo", Price: 300, Count: 50},
 	}
 
 	for i, product := range products {
 		productAsBytes, _ := json.Marshal(product)
 		err := ctx.GetStub().PutState("PRODUCT"+strconv.Itoa(i), productAsBytes)
 		if err != nil {
-			return fmt.Errorf("failed to put to world state. %s", err.Error())
+			return fmt.Errorf("Failed to put to world state. %s", err.Error())
 		}
 	}
 	return nil
@@ -92,7 +92,7 @@ func (s *SmartContract) CreateProduct(ctx contractapi.TransactionContextInterfac
 func (s *SmartContract) ChangeProductPrice(ctx contractapi.TransactionContextInterface, productNumber string, newPrice int) error {
 	productAsBytes, err := ctx.GetStub().GetState(productNumber)
 	if err != nil {
-		return fmt.Errorf("failed to read the product: %s", err.Error())
+		return fmt.Errorf("Failed to read the product: %s", err.Error())
 	}
 
 	product := new(Product)
