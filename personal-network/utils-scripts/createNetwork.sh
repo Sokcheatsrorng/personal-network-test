@@ -5,10 +5,10 @@ set -e
 set -o pipefail 
 function init(){
     echo "Adding the bin of hyperledger fabric to the PATH..."
-    export PATH=$PATH:/home/keo/Documents/blockchain_related/simple-blockchain-demon/personal-network/bin
+    export PATH=$PATH:/home/sokcheat/hyperledger/personal-network-test/simple-blockchain-demo/personal-network/bin
     # we should use this 
     # export .. $(pwd)/config 
-    export FABRIC_CFG_PATH=/home/keo/Documents/blockchain_related/simple-blockchain-demon/personal-network/config
+    export FABRIC_CFG_PATH=/home/sokcheat/hyperledger/personal-network-test/simple-blockchain-demo/personal-network/config
 }
 
 function generateCryptoConfig(){
@@ -155,8 +155,6 @@ function createChannel(){
             -c channeldemo -f /opt/gopath/fabric-samples/personal-network/channel-artifacts/Org2Anchor.tx \
             --tls --cafile $ORDERER_CA
 
-
-
         echo "---> Deploying the chaincode..."
 
         setOrgEnv "org1" "peer0" "7051"
@@ -177,7 +175,6 @@ function createChannel(){
         output=$(peer lifecycle chaincode queryinstalled)
         package_id=$(echo "$output" | grep -oP "Package ID: \K[^,]+")
         CC_PACKAGE_ID=$package_id
-        # package_id=becc_1:450678564457568689686867
         echo "CC_PACKAGE_ID=$CC_PACKAGE_ID"
         export CC_PACKAGE_ID=$CC_PACKAGE_ID
 
@@ -237,7 +234,23 @@ function createChannel(){
             --name becc
 
         # init 
-        # queryAllProducts here ! 
+        export ORDERER_CA=/opt/gopath/fabric-samples/personal-network/crypto-config/ordererOrganizations/personal-network.com/orderers/orderer.personal-network.com/msp/tlscacerts/tlsca.personal-network.com-cert.pem
+        export PEER_ORG1_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/tls/ca.crt
+        export PEER_ORG2_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/tls/ca.crt
+ 
+        export ORDERER_CA=/opt/gopath/fabric-samples/personal-network/crypto-config/ordererOrganizations/personal-network.com/orderers/orderer.personal-network.com/msp/tlscacerts/tlsca.personal-network.com-cert.pem
+        export PEER_ORG1_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org1.personal-network.com/peers/peer0.org1.personal-network.com/tls/ca.crt
+        export PEER_ORG2_TLSROOTCERTFILES=/opt/gopath/fabric-samples/personal-network/crypto-config/peerOrganizations/org2.personal-network.com/peers/peer0.org2.personal-network.com/tls/ca.crt
+
+        peer chaincode invoke -o orderer.personal-network.com:7050 --tls true --cafile $ORDERER_CA -C channeldemo -n becc --peerAddresses peer0.org1.personal-network.com:7051 --tlsRootCertFiles $PEER_ORG1_TLSROOTCERTFILES --peerAddresses peer0.org2.personal-network.com:7051 --tlsRootCertFiles $PEER_ORG2_TLSROOTCERTFILES  --isInit -c "{\"function\":\"initLedger\",\"Args\":[]}"
+
+        echo "Invoking chaincode with: -c '{"function":"initLedger","Args":[]}'"
+        echo '{"function":"InitLedger","Args":[]}' | jq .
+
+        # Query
+        echo "Querying all products..."
+        peer chaincode query -C channeldemo -n becc -c "{\"Args\":[\"QueryAllProducts\"]}"
+
     '
     }
 
